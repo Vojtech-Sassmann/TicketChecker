@@ -66,7 +66,6 @@ public class TourWatchImpl implements TourWatch {
         log.info("Watch started");
 
         state = new AtomicInteger(tourChecker.getTourFreeSpaces(tour));
-        log.error("Failed to load init value");
 
         Utils.getExecutor().execute(watcher);
     }

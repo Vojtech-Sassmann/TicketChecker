@@ -66,10 +66,9 @@ public class FreeSpaceNotificatorImpl implements FreeSpaceNotificator {
         }
     };
 
-    public FreeSpaceNotificatorImpl(TourWatch tourWatch) {
-        assert tourWatch != null;
-
-        this.tourWatch = tourWatch;
+    public FreeSpaceNotificatorImpl(String url, String arival, String depart) {
+        Tour tour = new Tour(depart, arival);
+        this.tourWatch = new TourWatchImpl(url, tour);
         this.started = false;
     }
 

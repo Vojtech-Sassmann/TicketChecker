@@ -23,8 +23,7 @@ public class TourCheckerImpl implements TourChecker {
 
     private static WebDriver webDriver;
 
-    // init driver
-    static {
+    private void initDriver() {
         String driverName = Utils.getProperty("driverName");
         String driverPath = Utils.getProperty("driverPath");
 
@@ -40,6 +39,7 @@ public class TourCheckerImpl implements TourChecker {
         if(url == null || url.isEmpty()) {
             throw new IllegalArgumentException("url can not be null or empty");
         }
+        initDriver();
         this.url = url;
     }
 
@@ -57,8 +57,6 @@ public class TourCheckerImpl implements TourChecker {
         }
         log.debug("Get tour free space called");
         List<Tour> tours = parseTours(webDriver);
-
-        //webDriver.quit();
 
         if(tours.contains(tour)) {
             return tours.get(tours.indexOf(tour)).getSpaces();
@@ -93,13 +91,13 @@ public class TourCheckerImpl implements TourChecker {
 
         for (int i = 0; i < departElements.size(); i++) {
             log.debug("Obtained a tour from site: arival: '{}', depart: '{}', spaces: '{}'",
-                    arivalElements.get(i).getText(),
-                    departElements.get(i).getText(),
-                    spaceElements.get(i).getText());
+                    arivalTimes.get(i),
+                    departTimes.get(i),
+                    spaceElements.get(i));
             tours.add(new Tour(
-                    departElements.get(i).getText(),
-                    arivalElements.get(i).getText(),
-                    spaceElements.get(i).getText()
+                    departTimes.get(i),
+                    arivalTimes.get(i),
+                    spaces.get(i)
             ));
         }
 
