@@ -5,5 +5,13 @@ package cz.tyckouni.TicketChecker.core;
  */
 public interface TourChecker {
 
-    int checkTour(Tour tour);
+    /**
+     * Try to find number of free spaces for given tour.
+     *
+     * @param tour searched tour
+     * @return count of free spaces or null if tour was not found
+     */
+    Integer getTourFreeSpaces(Tour tour);
+
+    void quitWebDriver();
 }

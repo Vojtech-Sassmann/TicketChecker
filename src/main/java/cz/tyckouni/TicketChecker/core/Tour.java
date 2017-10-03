@@ -1,21 +1,42 @@
 package cz.tyckouni.TicketChecker.core;
 
+import com.sun.istack.internal.NotNull;
+
 /**
- * Created by Vectoun on 1. 10. 2017.
+ * @author Vojech Sassmann &lt;vojtech.sassmann@gmail.com&gt;
  */
 public class Tour {
     private String arival;
     private String depart;
     private int spaces;
 
-    public Tour(String depart, String arival, String spaces) {
+    public Tour(@NotNull String depart,@NotNull String arival) {
+        assert depart != null;
+        assert arival != null;
+
         this.arival = arival;
         this.depart = depart;
-        if(!spaces.matches("-")) {
+    }
+
+    public Tour(@NotNull String depart, @NotNull String arival, String spaces) {
+        assert depart != null;
+        assert arival != null;
+
+        this.arival = arival;
+        this.depart = depart;
+
+        spaces = spaces.replaceAll("\\s*", "");
+        if(spaces.matches("-")) {
+            this.spaces = 0;
+        } else if(spaces.matches("[0-9]+")) {
             this.spaces = Integer.parseInt(spaces.replaceAll("\\s*", ""));
         } else {
-            this.spaces = 0;
+            throw new IllegalArgumentException("Invalid spaces argument: '" + spaces + "'");
         }
+    }
+
+    public void setSpaces(int spaces) {
+        this.spaces = spaces;
     }
 
     public String getArival() {
@@ -37,16 +58,14 @@ public class Tour {
 
         Tour tour = (Tour) o;
 
-        if (spaces != tour.spaces) return false;
-        if (arival != null ? !arival.equals(tour.arival) : tour.arival != null) return false;
-        return depart != null ? depart.equals(tour.depart) : tour.depart == null;
+        if (!arival.equals(tour.arival)) return false;
+        return depart.equals(tour.depart);
     }
 
     @Override
     public int hashCode() {
-        int result = arival != null ? arival.hashCode() : 0;
-        result = 31 * result + (depart != null ? depart.hashCode() : 0);
-        result = 31 * result + spaces;
+        int result = arival.hashCode();
+        result = 31 * result + depart.hashCode();
         return result;
     }
 
