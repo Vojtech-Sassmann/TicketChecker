@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author Vojech Sassmann &lt;vojtech.sassmann@gmail.com&gt;
@@ -18,6 +20,8 @@ public class Utils {
     private final static Logger log = LoggerFactory.getLogger(Utils.class);
 
     private static Properties appProperties;
+
+    private static Executor executor = Executors.newCachedThreadPool();
 
     static {
         appProperties = new Properties();
@@ -33,15 +37,7 @@ public class Utils {
         return appProperties.getProperty(propertyName);
     }
 
-    private WebDriver initDriver() {
-        String driverName = appProperties.getProperty("driverName");
-        String driverPath = appProperties.getProperty("driverPath");
-
-        System.setProperty(driverName, driverPath);
-
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless");
-
-        return new ChromeDriver(chromeOptions);
+    public synchronized static Executor getExecutor() {
+        return executor;
     }
 }

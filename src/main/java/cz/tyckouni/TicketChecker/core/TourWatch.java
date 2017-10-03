@@ -5,8 +5,12 @@ package cz.tyckouni.TicketChecker.core;
  */
 public interface TourWatch {
 
-    void startWatch(Tour tour);
+    void startWatch() throws InvalidWebElementsReceived;
 
+    /**
+     *
+     * @return the current state, or null when an error happend and the tourwatch stoped searching
+     */
     Integer getCurrentState();
 
     void stopWatch();

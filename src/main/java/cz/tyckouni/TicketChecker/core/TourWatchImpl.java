@@ -3,8 +3,6 @@ package cz.tyckouni.TicketChecker.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -13,35 +11,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TourWatchImpl implements TourWatch {
 
-    private static Executor executor = Executors.newCachedThreadPool();
-
     private final static Logger log = LoggerFactory.getLogger(TourWatchImpl.class);
 
-    private Runnable watcher = () -> {
-        try {
-            do {
-                log.info("watch started");
-                try {
-                    synchronized (this) {
-                        Integer i = this.tourChecker.getTourFreeSpaces(this.tour);
-                        log.info("New state received: " + i);
-                        this.state = new AtomicInteger(i);
-                        log.info("New state set: " + this.state);
-                    }
-                } catch (Exception e) {
-                    log.error("an exception", e);
-                }
-                try {
-                    Thread.sleep(Integer.parseInt(Utils.getProperty("refreshTime")));
-                } catch (InterruptedException e) {
-                    //should not happen
-                    throw new RuntimeException(e);
-                }
-            } while(this.keepWatching());
-        } catch (Exception e) {
-            log.error("an exception outside", e);
-        }
-    };
+    private AtomicBoolean keepWatching = new AtomicBoolean(false);
 
     private TourChecker tourChecker;
 
@@ -49,46 +21,67 @@ public class TourWatchImpl implements TourWatch {
 
     private Tour tour;
 
-    private AtomicBoolean keepWatching = new AtomicBoolean(false);
+    private Runnable watcher = () -> {
+        while (keepWatching.get()) {
+            try {
+                Integer i;
+                synchronized (this) {
+                    i = tourChecker.getTourFreeSpaces(tour);
+                    log.info("New state received: " + i);
+                }
+                state = new AtomicInteger(i);
+                log.info("New state set: " + state);
+            } catch (InvalidWebElementsReceived e) {
+                log.error("An exception happened during getting new state, previous state was: {}", state, e);
+                keepWatching.set(false);
+                state = null;
+            }
+            try {
+                Thread.sleep(Integer.parseInt(Utils.getProperty("webDriverRefreshTime")));
+            } catch (InterruptedException e) {
+                //should not happen
+                throw new RuntimeException(e);
+            }
+        }
+    };
 
-    public TourWatchImpl(String url) {
+    public TourWatchImpl(String url, Tour tour) {
         if(url == null) {
             throw new IllegalArgumentException("Url can not be null");
         }
+        if(tour == null) {
+            throw new IllegalArgumentException("Tour can not be null");
+        }
         tourChecker = new TourCheckerImpl(url);
+        this.tour = tour;
     }
 
     @Override
-    public void startWatch(Tour tour) {
+    public void startWatch() throws InvalidWebElementsReceived{
         if(tour == null) {
             throw new IllegalArgumentException("Tour argument can not be null.");
         }
-        this.tour = tour;
+        keepWatching.set(true);
 
-        this.state = new AtomicInteger(this.tourChecker.getTourFreeSpaces(tour));
-        log.info("initial state: {}", this.state);
-        this.keepWatching = new AtomicBoolean(true);
+        log.info("Watch started");
 
-        //executor.execute(watcher);
-        Thread t = new Thread(watcher);
-        t.setDaemon(false);
-        t.start();
+        state = new AtomicInteger(tourChecker.getTourFreeSpaces(tour));
+        log.error("Failed to load init value");
+
+        Utils.getExecutor().execute(watcher);
     }
 
     @Override
     public Integer getCurrentState() {
-        return this.state.get();
+        return state.get();
     }
 
     @Override
     public void stopWatch() {
+        log.info("Tour Watch stopped");
+        keepWatching.set(false);
         synchronized (this) {
             tourChecker.quitWebDriver();
         }
     }
-
-    synchronized private boolean keepWatching() {
-        return this.keepWatching.get();
-    }
-
 }

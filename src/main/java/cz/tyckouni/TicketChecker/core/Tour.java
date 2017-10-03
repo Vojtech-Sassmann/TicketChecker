@@ -26,9 +26,7 @@ public class Tour {
         this.depart = depart;
 
         spaces = spaces.replaceAll("\\s*", "");
-        if(spaces.matches("-")) {
-            this.spaces = 0;
-        } else if(spaces.matches("[0-9]+")) {
+        if(spaces.matches("[0-9]+")) {
             this.spaces = Integer.parseInt(spaces.replaceAll("\\s*", ""));
         } else {
             throw new IllegalArgumentException("Invalid spaces argument: '" + spaces + "'");
@@ -58,8 +56,7 @@ public class Tour {
 
         Tour tour = (Tour) o;
 
-        if (!arival.equals(tour.arival)) return false;
-        return depart.equals(tour.depart);
+        return arival.equals(tour.arival) && depart.equals(tour.depart);
     }
 
     @Override

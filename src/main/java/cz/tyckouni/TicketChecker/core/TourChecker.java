@@ -10,8 +10,9 @@ public interface TourChecker {
      *
      * @param tour searched tour
      * @return count of free spaces or null if tour was not found
+     * @throws InvalidWebElementsReceived when the number of arrivals, departs and free spaces are not the same
      */
-    Integer getTourFreeSpaces(Tour tour);
+    Integer getTourFreeSpaces(Tour tour) throws InvalidWebElementsReceived;
 
     void quitWebDriver();
 }

@@ -23,6 +23,7 @@ public class TourCheckerImpl implements TourChecker {
 
     private static WebDriver webDriver;
 
+    // init driver
     static {
         String driverName = Utils.getProperty("driverName");
         String driverPath = Utils.getProperty("driverPath");
@@ -48,13 +49,13 @@ public class TourCheckerImpl implements TourChecker {
     }
 
     @Override
-    public Integer getTourFreeSpaces(Tour tour) {
+    public Integer getTourFreeSpaces(Tour tour) throws InvalidWebElementsReceived {
         try {
             webDriver.get(url);
         } catch (Exception e) {
             log.error("error");
         }
-        log.info("get tour free space started");
+        log.debug("Get tour free space called");
         List<Tour> tours = parseTours(webDriver);
 
         //webDriver.quit();
@@ -66,7 +67,7 @@ public class TourCheckerImpl implements TourChecker {
         }
     }
 
-    private List<Tour> parseTours(WebDriver driver) {
+    private List<Tour> parseTours(WebDriver driver) throws InvalidWebElementsReceived {
         assert driver != null;
 
         List<Tour> tours = new ArrayList<>();
@@ -78,7 +79,23 @@ public class TourCheckerImpl implements TourChecker {
         List<WebElement> departElements = driver.findElements(By.className(departColumn));
         List<WebElement> arivalElements = driver.findElements(By.className(arivalColumn));
         List<WebElement> spaceElements = driver.findElements(By.className(spaceColumn));
+
+        List<String> departTimes = getStringsFromWebElements(departElements);
+        List<String> arivalTimes = getStringsFromWebElements(arivalElements);
+        List<String> spaces = getStringsFromWebElements(spaceElements);
+
+        if (!(departTimes.size() == arivalTimes.size() &&
+              departTimes.size() == spaces.size())) {
+            log.error("Invalid web elements received: departs={}, arrivals={}, free spaces={}",
+                    departTimes, arivalTimes, spaces);
+            throw new InvalidWebElementsReceived("Invalid web elements received");
+        }
+
         for (int i = 0; i < departElements.size(); i++) {
+            log.debug("Obtained a tour from site: arival: '{}', depart: '{}', spaces: '{}'",
+                    arivalElements.get(i).getText(),
+                    departElements.get(i).getText(),
+                    spaceElements.get(i).getText());
             tours.add(new Tour(
                     departElements.get(i).getText(),
                     arivalElements.get(i).getText(),
@@ -87,5 +104,15 @@ public class TourCheckerImpl implements TourChecker {
         }
 
         return tours;
+    }
+
+    private List<String> getStringsFromWebElements(List<WebElement> elements) {
+        List<String> strings = new ArrayList<>();
+        elements.forEach((depart) -> {
+            if (!depart.getText().replaceAll("\\s+", "").isEmpty()) {
+                strings.add(depart.getText());
+            }
+        });
+        return strings;
     }
 }

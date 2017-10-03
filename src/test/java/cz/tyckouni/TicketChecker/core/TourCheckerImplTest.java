@@ -21,14 +21,14 @@ public class TourCheckerImplTest {
     }
 
     @Test
-    public void getTourFreeSpaces() {
+    public void getTourFreeSpaces() throws Exception {
         Tour tour = new Tour("10:45", "16:16");
 
         assertThat(tourChecker.getTourFreeSpaces(tour)).isGreaterThan(-1).isLessThan(101);
     }
 
     @Test
-    public void getTourFreeSpacesRepeatedCheck() {
+    public void getTourFreeSpacesRepeatedCheck() throws Exception {
         Tour tour1 = new Tour("10:45", "16:16");
         Tour tour2 = new Tour("18:05", "20:45");
 
