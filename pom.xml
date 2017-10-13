@@ -8,6 +8,7 @@
     <modules>
         <module>gui</module>
         <module>core</module>
+        <module>testmodule</module>
     </modules>
 
     <groupId>cz.tyckouni</groupId>

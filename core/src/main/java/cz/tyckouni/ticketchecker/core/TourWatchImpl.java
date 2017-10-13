@@ -37,7 +37,7 @@ public class TourWatchImpl implements TourWatch {
                 state = null;
             }
             try {
-                Thread.sleep(Integer.parseInt(Utils.getProperty("webDriverRefreshTime")));
+                Thread.sleep(Integer.parseInt(Utils.getProperty("refreshTime")));
             } catch (InterruptedException e) {
                 //should not happen
                 throw new RuntimeException(e);
